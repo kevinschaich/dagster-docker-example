@@ -12,3 +12,13 @@ compute_logs:
   class: LocalComputeLogManager
   config:
     base_dir: "/opt/dagster/dagster_home/logs"
+
+# this doesn't work right now
+
+# run_launcher:
+#   module: dagster_docker
+#   class: DockerRunLauncher
+#   config:
+#     container_kwargs:
+#       volumes:
+#         - /var/run/docker.sock:/var/run/docker.sock

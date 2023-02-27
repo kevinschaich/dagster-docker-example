@@ -1,13 +1,4 @@
 services:
-  ######################################################################################################################
-  # Local Dagster (dev)
-  ######################################################################################################################
-
-  # This service runs the gRPC server that loads your user code, in both dagit
-  # and dagster-daemon. By setting DAGSTER_CURRENT_IMAGE to its own image, we tell the
-  # run launcher to use this same image when launching runs in a new container as well.
-  # Multiple containers like this can be deployed separately - each just needs to run on
-  # its own port, and have its own entry in the workspace.yaml file that's loaded by dagit.
   dagster-executor:
     build:
       context: .
@@ -15,16 +6,16 @@ services:
     container_name: dagster-executor
     restart: always
     environment:
-      # POSTGRES_HOST: ${POSTGRES_HOST}
-      # POSTGRES_DB: ${POSTGRES_DB}
-      # POSTGRES_PORT: ${POSTGRES_PORT}
-      # POSTGRES_USER: ${POSTGRES_USER}
-      # POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       DAGSTER_CURRENT_IMAGE: "dagster-executor"
     ports:
       - "4000:4000"
-    # depends_on:
-      # - db
+    depends_on:
+      - db
     entrypoint: "dagster api grpc -h 0.0.0.0 -p 4000 -d /opt/dagster/app -m pipelines"
     volumes:
       # User Code
@@ -34,20 +25,17 @@ services:
       # Persistent Storage
       - ./volumes/dagster/data:/opt/dagster/app/data
 
-  # This service runs dagit, which loads your user code from the user code container.
-  # Since our instance uses the QueuedRunCoordinator, any runs submitted from dagit will be put on
-  # a queue and later dequeued and launched by dagster-daemon.
   dagster-dagit:
     build:
       context: .
       dockerfile: ./dagster/dagster.Dockerfile
     container_name: dagster-dagit
-    # environment:
-      # POSTGRES_HOST: ${POSTGRES_HOST}
-      # POSTGRES_DB: ${POSTGRES_DB}
-      # POSTGRES_PORT: ${POSTGRES_PORT}
-      # POSTGRES_USER: ${POSTGRES_USER}
-      # POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "3003:3003"
     volumes:
@@ -63,19 +51,17 @@ services:
       - dagster-executor
     entrypoint: "dagit -h 0.0.0.0 -p 3003 -w ./workspace.yaml"
 
-  # This service runs the dagster-daemon process, which is responsible for taking runs
-  # off of the queue and launching them, as well as creating runs from schedules or sensors.
   dagster-daemon:
     build:
       context: .
       dockerfile: ./dagster/dagster.Dockerfile
     container_name: dagster-daemon
-    # environment:
-      # POSTGRES_HOST: ${POSTGRES_HOST}
-      # POSTGRES_DB: ${POSTGRES_DB}
-      # POSTGRES_PORT: ${POSTGRES_PORT}
-      # POSTGRES_USER: ${POSTGRES_USER}
-      # POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     restart: unless-stopped
     volumes:
       # Docker Client

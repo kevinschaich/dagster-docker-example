@@ -1,4 +1,3 @@
-# FROM python:3.7-slim
 FROM jupyter/pyspark-notebook
 
 # Set working directory
