@@ -1,0 +1,23 @@
+# Docker
+volumes
+
+# Creds
+.env.local
+.env.dev
+.env.development
+.env.prod
+.env.production
+
+# Logs
+logs
+*.log
+
+# Python
+__pycache__
+/build
+.ipynb_checkpoints
+
+# Misc.
+.idea
+.DS_Store
+*.pem
